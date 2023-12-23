@@ -16,14 +16,14 @@ Egy nyílt forráskódú munkanapló vezetését megkönnyítő alkalmazás
 
 1. Docker kép letöltése:
     ```bash
-    sudo docker pull tm01013/munkanaploBE
+    sudo docker pull tm01013/munkanaplo-be
     ```
 
 2. Szerver indítása:
     ```bash
-    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaploBE
+    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo-be
     ```
-3. Konfiguráció hozzáadása (opcionális)
+3. Konfiguráció hozzáadása (kötelező)
     ```bash
     sudo docker cp <.env fájl> Munkanaplo:/app/.env
     ```
@@ -51,8 +51,8 @@ Egy nyílt forráskódú munkanapló vezetését megkönnyítő alkalmazás
     ```
 3. Új konténer telepítése
     ```bash
-    sudo docker pull tm01013/munkanaploBE
-    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaploBE
+    sudo docker pull tm01013/munkanaplo-be
+    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo-be
     ```
 4. Adatbázis bemásolása az új konténerbe
     ```bash
@@ -81,14 +81,14 @@ Egy nyílt forráskódú munkanapló vezetését megkönnyítő alkalmazás
 
 3. Docker kép készítése
     ```bash
-    sudo docker build -t munkanaploBE --no-cache .
+    sudo docker build -t munkanaplo-be --no-cache .
     ```
 
 4. Szerver indítása
     ```bash
-    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaploBE
+    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo-be
     ```
-5. Konfiguráció hozzáadása (opcionális)
+5. Konfiguráció hozzáadása (kötelező)
     ```bash
     sudo docker cp <.env fájl> Munkanaplo:/app/.env
     ```
