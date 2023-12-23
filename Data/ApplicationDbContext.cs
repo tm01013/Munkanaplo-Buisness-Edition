@@ -26,6 +26,9 @@ public class ApplicationDbContext : IdentityDbContext
 	public DbSet<Munkanaplo2.Models.JobModel> JobModel { get; set; } = default!;
 	public DbSet<Munkanaplo2.Models.SubTaskModel> SubTaskModel { get; set; } = default!;
 	public DbSet<Munkanaplo2.Models.ProjectModel> ProjectModel { get; set; } = default!;
+
+	public DbSet<Munkanaplo2.Models.WorkModel> WorkModel { get; set; } = default!;
+	public DbSet<WorkerModel> Workers { get; set; } = default!;
 	public DbSet<ProjectMembership> ProjectMemberships { get; internal set; }
 
 	/*protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,12 +1,37 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject Munkanaplo2.Services.IWorkService WorkService
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
+        @if (!ManagerHelper.IsManager(User))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-light" asp-action="OpenWorkTable" asp-controller="Jobs"
+                    asp-route-UserName="@User.Identity.Name"><i class="bi bi-table"></i> Munkáim</a>
+            </li>
+            <li class="nav-item">
+                @if (WorkService.GetMyOngoingWork() != null)
+                {
+                    <a class="nav-link text-light" asp-action="OpenWork" asp-controller="Jobs"
+                        asp-route-id="@WorkService.GetMyOngoingWork().Id"><i class="bi bi-briefcase-fill"></i>
+                        @WorkService.GetJobTitleByWorkId(WorkService.GetMyOngoingWork().Id)</a>
+                }
+            </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link text-light" asp-action="Index" asp-controller="Workers"><i class="bi bi-people-fill"></i>
+                    Beosztottjaim</a>
+            </li>
+        }
         <li class="nav-item">
-            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name.ToString().Split(" [Tanár]")[0]!</a>
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello
+                @User.Identity?.Name.ToString().Split(" [Menedzser]")[0]!</a>
         </li>
         <li class="nav-item">
             <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"

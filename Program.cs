@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Munkanaplo2.Data;
 using Munkanaplo2.Services;
+using dotenv.net;
+using Munkanaplo2.Areas.Identity.Data;
 //using RPauth.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<IProjectService, ProjectService>();
+builder.Services.AddScoped<IWorkService, WorkService>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -23,11 +26,17 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 });
 
+
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
+
+DotEnv.Load(options: new DotEnvOptions(envFilePaths: new[] { Path.Combine(app.Environment.ContentRootPath, ".env") }));
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -124,6 +133,21 @@ app.MapControllerRoute(
 #endregion
 
 app.MapControllerRoute(
+    name: "munka",
+    pattern: "/feladatok/munka/{id}",
+    defaults: new { controller = "Jobs", action = "OpenWork", id = "" });
+
+app.MapControllerRoute(
+    name: "munkák",
+    pattern: "{UserName}/munkák",
+    defaults: new { controller = "Jobs", action = "OpenWorkTable", UserName = "" });
+
+app.MapControllerRoute(
+    name: "beosztottak",
+    pattern: "beosztottak",
+    defaults: new { controller = "Workers", action = "Index" });
+
+app.MapControllerRoute(
     name: "hiba",
     pattern: "hiba",
     defaults: new { controller = "Home", action = "Hiba" });
@@ -135,6 +159,8 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+
 app.MapRazorPages();
 
 app.Run();

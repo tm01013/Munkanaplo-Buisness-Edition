@@ -10,6 +10,7 @@ using Munkanaplo2.Data;
 using Munkanaplo2.Models;
 using Microsoft.AspNetCore.Identity;
 using Munkanaplo2.Global;
+using dotenv.net;
 
 namespace Munkanaplo2.Controllers
 {
@@ -26,6 +27,8 @@ namespace Munkanaplo2.Controllers
         [Authorize]
         public async Task<IActionResult> Index()
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             if (User.Identity.Name != null)
             {
                 var projectMemberships = _context.ProjectMemberships.ToList();
@@ -36,43 +39,19 @@ namespace Munkanaplo2.Controllers
                             Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
 
             }
-            /*else if (User.Identity.Name != null && TeacherHelper.IsTeacher(User.Identity.Name))
-            {
-                return RedirectToAction("TeacherView");
-            }*/
             else
             {
                 return View("Hiba");
             }
         }
 
-        /*[Authorize]
-        public async Task<IActionResult> TeacherView()
-        {
-            if (User.Identity.Name != null && TeacherHelper.IsTeacher(User.Identity.Name))
-            {
-                var projectMemberships = _context.ProjectMemberships.ToList();
-                ViewBag.ProjectMemberships = projectMemberships;
-
-                return _context.ProjectModel != null ?
-                            View(await _context.ProjectModel.Where(pm => pm.ProjectMembers.Where(m => m.Member == User.Identity.Name.ToString()).Any()).ToListAsync()) :
-                            Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
-
-            }
-            else if (User.Identity.Name != null && !TeacherHelper.IsTeacher(User.Identity.Name))
-            {
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                return View("Hiba");
-            }
-        }*/
 
         // GET: Projects/Details/5
         [Authorize]
         public async Task<IActionResult> Details(int? id)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             if (id == null || _context.ProjectModel == null)
             {
                 return NotFound();
@@ -103,7 +82,10 @@ namespace Munkanaplo2.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
-            if (!TeacherHelper.IsTeacher(User)) return View();
+            if (!IsConfigCorrect()) return View("ConfigError");
+
+            if (ManagerHelper.IsManager(User) || DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") return View();
+
             else return View("AccesDenied");
         }
 
@@ -115,9 +97,11 @@ namespace Munkanaplo2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,ProjectTitle, ProjectCreator")] ProjectModel ProjectModel)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             //if (ModelState.IsValid)
             //{
-            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
 
             ProjectModel inputModel = ProjectModel;
             int projectId = 1;
@@ -158,7 +142,9 @@ namespace Munkanaplo2.Controllers
         // GET: Projects/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (!IsConfigCorrect()) return View("ConfigError");
+
+            if (!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
 
             if (id == null || _context.ProjectModel == null)
             {
@@ -189,6 +175,8 @@ namespace Munkanaplo2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditConfirmed(int id, [Bind("Id, ProjectTitle, ProjectCreator")] ProjectModel ProjectModel)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             if (id != ProjectModel.Id)
             {
                 return NotFound();
@@ -198,8 +186,8 @@ namespace Munkanaplo2.Controllers
                         .Where(pm => pm.ProjectId == id)
                         .ToList();
 
-            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
-            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            if (!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
+            if (ProjectModel.ProjectCreator != User.Identity.Name.ToString())
             {
                 return View("AccesDenied");
             }
@@ -241,6 +229,8 @@ namespace Munkanaplo2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMembership(int id, [Bind("Id, ProjectTitle, ProjectCreator")] ProjectModel ProjectModel, [Bind("ProjectMembersToRemove")] string projectMembersToRemove)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             if (id != ProjectModel.Id)
             {
                 return NotFound();
@@ -298,64 +288,12 @@ namespace Munkanaplo2.Controllers
             return View("Hiba");
         }
 
-        /*[HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddMembership(int id, [Bind("Id, ProjectTitle, ProjectCreator")] ProjectModel ProjectModel, [Bind("ProjectMembersToAdd")] string projectMembersToAdd)
-        {
-            if (id != ProjectModel.Id)
-            {
-                return NotFound();
-            }
-
-            if (ProjectModel.ProjectCreator != null && ProjectModel.ProjectTitle != null && projectMembersToAdd != string.Empty)
-            {
-
-                var projectMemberships = _context.ProjectMemberships
-                    .Where(pm => pm.ProjectId == ProjectModel.Id)
-                    .ToList();
-
-
-                var projectMembershipToAdd = new ProjectMembership
-                {
-                    ProjectId = ProjectModel.Id,
-                    Member = projectMembersToAdd
-                };
-                projectMemberships.Add(projectMembershipToAdd);
-
-                var projectModelToAdd = new ProjectModel
-                {
-                    Id = id,
-                    ProjectTitle = ProjectModel.ProjectTitle,
-                    ProjectCreator = ProjectModel.ProjectCreator,
-                    ProjectMembers = projectMemberships
-                };
-
-                try
-                {
-                    _context.Update(projectModelToAdd);
-                    _context.Add(projectMembershipToAdd);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProjectModelExists(ProjectModel.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View("Error");
-        }*/
 
         [Authorize]
         public async Task<IActionResult> EditProjectMembers(int? id)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             if (id == null || _context.ProjectModel == null)
             {
                 return NotFound();
@@ -371,8 +309,8 @@ namespace Munkanaplo2.Controllers
                                     .Where(pm => pm.ProjectId == ProjectModel.Id)
                                     .ToList();
 
-            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
-            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            if (!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
+            if (ProjectModel.ProjectCreator != User.Identity.Name.ToString())
             {
                 return View("AccesDenied");
             }
@@ -421,14 +359,16 @@ namespace Munkanaplo2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProjectMembersConfirmed(int ProjectId, List<EditUsersViewModel> editUsersViewModels)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             ProjectModel project = await _context.ProjectModel.FindAsync(ProjectId);
 
             var projectMemberships = _context.ProjectMemberships
                                     .Where(pm => pm.ProjectId == ProjectId)
                                     .ToList();
 
-            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
-            if (!projectMemberships.Where(pm => pm.Member == User.Identity.Name).Any())
+            if (!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
+            if (project.ProjectCreator != User.Identity.Name.ToString())
             {
                 return View("AccesDenied");
             }
@@ -464,6 +404,8 @@ namespace Munkanaplo2.Controllers
         // GET: Projects/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             if (id == null || _context.ProjectModel == null)
             {
                 return NotFound();
@@ -476,7 +418,7 @@ namespace Munkanaplo2.Controllers
                         .Where(pm => pm.ProjectId == id)
                         .ToList();
 
-            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
             if (ProjectModel.ProjectCreator != User.Identity.Name.ToString())
             {
                 return View("AccesDenied");
@@ -498,6 +440,8 @@ namespace Munkanaplo2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!IsConfigCorrect()) return View("ConfigError");
+
             if (_context.ProjectModel == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.ProjectModel'  is null.");
@@ -509,7 +453,7 @@ namespace Munkanaplo2.Controllers
 
             var ProjectModel = await _context.ProjectModel.FindAsync(id);
 
-            if (TeacherHelper.IsTeacher(User)) return View("AccesDenied");
+            if (!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
             if (ProjectModel.ProjectCreator != User.Identity.Name.ToString())
             {
                 return View("AccesDenied");
@@ -604,5 +548,16 @@ namespace Munkanaplo2.Controllers
             }
         }
 
+        bool IsConfigCorrect()
+        {
+            if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == null) return false;
+            if (DotEnv.Read()["USE_MANAGERS"].ToLower() == null) return false;
+            if (DotEnv.Read()["USE_MANAGERS"].ToLower().Trim() == "") return false;
+
+            if (DotEnv.Read()["USE_MANAGERS"].ToLower() == "false" && DotEnv.Read()["ADMIN_USERNAME"].ToLower().Trim() == "") return false;
+            if (DotEnv.Read()["USE_MANAGERS"].ToLower() != "true" && DotEnv.Read()["USE_MANAGERS"].ToLower() != "false") return false;
+
+            return true;
+        }
     }
 }

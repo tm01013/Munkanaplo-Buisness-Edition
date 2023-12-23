@@ -7,9 +7,11 @@
 @using Microsoft.AspNetCore.Identity
 @using Munkanaplo2.Global
 @using Munkanaplo2.Services
+@using dotenv.net
 @inject IProjectService projectService
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
+@inject IWorkService WorkService
 
 @if (SignInManager.IsSignedIn(User))
 {
@@ -61,6 +63,12 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.CreationDate)
         </dd>
+        <dt class="col-sm-2">
+            Összes munka
+        </dt>
+        <dd class="col-sm-10">
+            @TimeSpan.FromMinutes(ViewBag.TotalMinutesWorkedOn).Hours:@TimeSpan.FromMinutes(ViewBag.TotalMinutesWorkedOn).Minutes
+        </dd>
         @if (Model.JobStatus != "folyamatban")
                 {
                     <dt class="col-sm-2">
@@ -70,7 +78,24 @@
                         @Html.DisplayFor(model => model.FinishDate)
                     </dd>
                 }
-            </dl>
+    </dl>
+    @if(WorkService.GetMyOngoingWork() == null && ((!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") || (DotEnv.Read()["ADMIN_USERNAME"].ToString() != User.Identity.Name && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")))
+    {
+        <form id="startWork-form" class="form-inline my-5" asp-controller="Jobs" asp-action="StartWork">
+        <input type="hidden" name="JobId" value="@Model.Id"></input>
+        <input form="startWork-form" type="submit" value="Munka indítása" class="btn btn-primary"></input>
+        </form>
+    }
+    else if(WorkService.GetMyOngoingWork() != null && ((!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") || (DotEnv.Read()["ADMIN_USERNAME"].ToString() != User.Identity.Name && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")))
+    {
+        <div class="pt-3 my-3 pb-4">
+            <a class="btn btn-secondary" asp-action="OpenWorkTable" asp-controller="Jobs" asp-route-UserName="@User.Identity.Name">Már folyamatban van egy munkád</a>
+        </div>
+    }
+    
+
+<!--- SubTasks --->
+
             <table class="table">
                 <thead>
                     <tr>
@@ -80,9 +105,12 @@
                             <strong>Alfeladatok</strong>
                         </th>
                         <th>
-                            @if (!TeacherHelper.IsTeacher(User))
+                            @if (!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")
                             {
-                                <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#addSubTask">Új</a>
+                                @if(dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "true" || dotenv.net.DotEnv.Read()["ADMIN_USERNAME"] != User.Identity.Name)
+                                {
+                                    <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#addSubTask">Új</a>
+                                }
                             }
                         </th>
                         <th>
@@ -129,7 +157,7 @@
                 <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
             </div>
             <div class="modal-body">
-                @if (!TeacherHelper.IsTeacher(User))
+                        @if (!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")
                         {
                             <form id="addSubTaskForm" class="form-inline" asp-controller="Jobs" asp-action="CreateSubTask">
                                 <input type="hidden" name="JobId" value="@Model.Id"></input>
@@ -165,8 +193,10 @@
             </div>
         </div>
 
+<!--- Kész gomb --->
+
         <div>
-    @if (!TeacherHelper.IsTeacher(User) && Model.JobStatus == "folyamatban")
+            @if ((!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") && Model.JobStatus == "folyamatban")
             {
                 <form asp-controller="Jobs" asp-action="EditConfirmed">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -212,18 +242,10 @@
                 </form>
                 <br />
             }
-            @if (!TeacherHelper.IsTeacher(User))
-            {
-                <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Edit"
-                    asp-route-id="@Model?.Id">Szerkesztés</a> <a> | </a>
-                <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
-                    asp-action="Index">Vissza</a>
-            }
-            else
-            {
-                <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
-                    asp-action="Index">Vissza</a>
-            }
+            <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-action="Edit"
+                asp-route-id="@Model?.Id">Szerkesztés</a> <a> | </a>
+            <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
+                asp-action="Index">Vissza</a>
         </div>
     }
 }

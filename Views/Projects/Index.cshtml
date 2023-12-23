@@ -15,7 +15,7 @@
     <h1>Projektek</h1>
 
 
-    @if (!TeacherHelper.IsTeacher(User))
+    @if (ManagerHelper.IsManager(User))
     {
         <p>
     <a asp-action="Create">Új projekt</a>

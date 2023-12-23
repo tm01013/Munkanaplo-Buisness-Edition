@@ -1,0 +1,240 @@
+@model List<Munkanaplo2.Models.WorkModel>
+
+@{
+    ViewData["Title"] = "Munkák";
+    string[] months = {"Január", "Február", "Március", "Április", "Május", "Júnuis", "Július", "Augusztus", "Szeptember",
+"Október", "November", "December"};
+    int[] hoursWorkedSums = new int[12];
+    foreach (WorkModel work in Model)
+    {
+        if (work.isFinished)
+        {
+            string[] endTime = work.EndTiem.Split('/', ' ', ':');
+            DateTime endSpan = DateTime.Parse(work.EndTiem);
+            DateTime startSpan = DateTime.Parse(work.StartTime);
+            switch (endTime[0])
+            {
+                case "1":
+                    hoursWorkedSums[0] = hoursWorkedSums[0] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "2":
+                    hoursWorkedSums[1] = hoursWorkedSums[1] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "3":
+                    hoursWorkedSums[2] = hoursWorkedSums[2] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "4":
+                    hoursWorkedSums[3] = hoursWorkedSums[3] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "5":
+                    hoursWorkedSums[4] = hoursWorkedSums[4] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "6":
+                    hoursWorkedSums[5] = hoursWorkedSums[5] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "7":
+                    hoursWorkedSums[6] = hoursWorkedSums[6] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "8":
+                    hoursWorkedSums[7] = hoursWorkedSums[7] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "9":
+                    hoursWorkedSums[8] = hoursWorkedSums[8] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "10":
+                    hoursWorkedSums[9] = hoursWorkedSums[9] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "11":
+                    hoursWorkedSums[10] = hoursWorkedSums[10] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+                case "12":
+                    hoursWorkedSums[11] = hoursWorkedSums[11] + int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+                    break;
+            }
+        }
+    }
+
+    //row, col
+    int[,] workPerJobPerMonth = new int[12, ViewBag.FirstJobTitles.Count];
+    List<WorkModel>[,] workPerJob = new List<WorkModel>[12, ViewBag.FirstJobTitles.Count];
+    for (int r = 0; r < 12; r++)
+    {
+        for (int c = 0; c < ViewBag.FirstJobTitles.Count; c++)
+        {
+            workPerJob[r, c] = new List<WorkModel>();
+        }
+    }
+
+    for (int r = 0; r < 12; r++)
+    {
+        List<WorkModel> worksPerCurrentMonth = new List<WorkModel>();
+
+        foreach (WorkModel work in Model)
+        {
+            string[] endTime = work.EndTiem.Split('/', ' ', ':');
+            if (endTime[0] == (r + 1).ToString()) worksPerCurrentMonth.Add(work);
+        }
+        for (int c = 0; c < ViewBag.FirstJobTitles.Count; c++)
+        {
+            for (int i = 0; i < worksPerCurrentMonth.Count; i++)
+            {
+                if (WorkService.GetJobTitleByWorkId(worksPerCurrentMonth[i].Id) == ViewBag.FirstJobTitles[c])
+                {
+                    DateTime endSpan = DateTime.Parse(worksPerCurrentMonth[i].EndTiem);
+                    DateTime startSpan = DateTime.Parse(worksPerCurrentMonth[i].StartTime);
+
+                    workPerJobPerMonth[r, c] += int.Parse(endSpan.Subtract(startSpan).TotalSeconds.ToString());
+
+
+
+                    if (workPerJob[r, c].Count > 0)
+                    {
+                        bool isMatchingFound = false;
+                        for (int id = 0; id< workPerJob[r, c].Count; id++)
+                        {
+                            if (DateTime.Parse(workPerJob[r,c][id].StartTime).Day == DateTime.Parse(worksPerCurrentMonth[i].StartTime).Day && workPerJob[r,c][id].JobId ==
+                            worksPerCurrentMonth[i].JobId)
+                            {
+                                DateTime endSpan1 = DateTime.Parse(workPerJob[r,c][id].EndTiem);
+                                DateTime startSpan1 = DateTime.Parse(workPerJob[r,c][id].StartTime);
+
+                                DateTime endSpan2 = DateTime.Parse(worksPerCurrentMonth[i].EndTiem);
+                                DateTime startSpan2 = DateTime.Parse(worksPerCurrentMonth[i].StartTime);
+
+                                int secondsWorked1 = int.Parse(endSpan1.Subtract(startSpan1).TotalSeconds.ToString());
+                                int secondsWorked2 = int.Parse(endSpan2.Subtract(startSpan2).TotalSeconds.ToString());
+
+                                
+                                WorkModel overallWork = new WorkModel
+                                        {
+                                            Id = workPerJob[r,c][id].Id,
+                                            JobId = workPerJob[r,c][id].JobId,
+                                            StartTime = workPerJob[r,c][id].StartTime,
+                                            EndTiem = DateTime.Parse(workPerJob[r,c][id].StartTime).AddSeconds(secondsWorked1 + secondsWorked2).ToString("M/d/yyyy h:mm:ss tt"),
+                                            User = workPerJob[r,c][id].User,
+                                            isFinished = true
+                                        };
+                                workPerJob[r, c][id] = overallWork;
+
+                                isMatchingFound = true;
+                            }
+                        }
+                        if(!isMatchingFound)
+                        {
+                            if(!workPerJob[r, c].Contains(worksPerCurrentMonth[i])) workPerJob[r, c].Add(worksPerCurrentMonth[i]);
+                        }
+                    }
+                    else
+                    {
+                        workPerJob[r, c].Add(worksPerCurrentMonth[i]);
+                    }
+
+                }
+            }
+        }
+    }
+}
+
+@using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
+@using Munkanaplo2.Services
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject IWorkService WorkService
+
+
+<h1 class="display-4">Munkák</h1>
+<br>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th class="col-3"><strong>Hónap</strong></th>
+            <th class="col-2"></th>
+            <th class="col-2"><strong>Összes óra</strong></th>
+            <th class="col-1"></th>
+            @foreach (string title in ViewBag.FirstJobTitles)
+            {
+                <th><strong>@title</strong></th>
+            }
+            @foreach (string title in ViewBag.SecondJobTitles)
+            {
+                <th>@title</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @for (int m = 0; m < months.Length; m++)
+        {
+            <tr>
+                <td><button type="button" class="btn btn-info" data-bs-toggle="collapse"
+                        data-bs-target="#monthCollapse-@(m)" aria-expanded="false"
+                        aria-controls="monthCollapse-@(m)">@months[m]</button>
+                </td>
+
+                @{
+                    float moneyGot = (float)ViewBag.MoneyPerHour * (float)(TimeSpan.FromSeconds(hoursWorkedSums[m]).TotalMinutes / 60);
+                    float moneyGotRounded = moneyGot % 1000 >= 500 ? ((moneyGot - moneyGot % 1000) + 1000) : (moneyGot - moneyGot % 1000);
+                }
+
+                <td>@((int)moneyGotRounded) Ft</td>
+
+                <td scope="row">
+                    <strong>@TimeSpan.FromSeconds(hoursWorkedSums[m]).Hours:@TimeSpan.FromSeconds(hoursWorkedSums[m]).Minutes</strong>
+                </td>
+
+                <td></td>
+
+                @for (int fj = 0; fj < ViewBag.FirstJobTitles.Count; fj++)
+                {
+                    <td><strong>@TimeSpan.FromSeconds(workPerJobPerMonth[m, fj]).Hours:@TimeSpan.FromSeconds(workPerJobPerMonth[m,fj]).Minutes</strong></td>
+                }
+                @foreach (string title in ViewBag.SecondJobTitles)
+                {
+                    <td>0:00</td>
+                }
+            </tr>
+
+
+
+            <!------------------------ Collapsed sections ------------------------------>
+            @for (int fj = 0; fj < ViewBag.FirstJobTitles.Count; fj++)
+            {
+                @for (int w = 0; w < workPerJob[m, fj].Count; w++)
+                {
+                    <tr id="monthCollapse-@(m)" class="collapse multi-collapse">
+                        <td class="ps-3">@months[m] @DateTime.Parse(workPerJob[m, fj][w].StartTime).Day</td>
+
+                        @{
+                            float moneyGotAtDay = (float)ViewBag.MoneyPerHour * (float)(DateTime.Parse(workPerJob[m, fj][w].EndTiem).Subtract(DateTime.Parse(workPerJob[m,fj][w].StartTime)).TotalMinutes / 60);
+                            float moneyGotRoundedAtDay = moneyGotAtDay % 1000 >= 500 ? ((moneyGotAtDay - moneyGotAtDay % 1000) + 1000) : (moneyGotAtDay - moneyGotAtDay % 1000);
+                        }
+
+                        <td>@((int)moneyGotRoundedAtDay) Ft</td>
+
+                        <td></td>
+                        <td></td>
+                        @for (int a = 0; a < ViewBag.FirstJobTitles.Count; a++)
+                        {
+                            if (ViewBag.FirstJobTitles[a] == WorkService.GetJobTitleByWorkId(workPerJob[m, fj][w].Id))
+                            {
+                                <td>@DateTime.Parse(workPerJob[m, fj][w].EndTiem).Subtract(DateTime.Parse(workPerJob[m,
+                                             fj][w].StartTime)).Hours:@DateTime.Parse(workPerJob[m, fj][w].EndTiem).Subtract(DateTime.Parse(workPerJob[m, fj][w].StartTime)).Minutes
+                                </td>
+                            }
+                            else
+                            {
+                                <td>-</td>
+                            }
+                        }
+
+                        @for (int a = 0; a < ViewBag.SecondJobTitles.Count; a++)
+                        {
+                            <td></td>
+                        }
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>

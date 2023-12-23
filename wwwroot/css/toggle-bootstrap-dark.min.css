@@ -64,13 +64,16 @@ body.bootstrap-dark {
 .bootstrap-dark aside,
 .bootstrap-dark figcaption,
 .bootstrap-dark figure,
-.bootstrap-dark footer,
 .bootstrap-dark header,
 .bootstrap-dark hgroup,
 .bootstrap-dark main,
 .bootstrap-dark nav,
 .bootstrap-dark section {
   display: block;
+}
+.bootstrap-dark footer {
+  display: block;
+  background: black;
 }
 .bootstrap-dark body {
   margin: 0;

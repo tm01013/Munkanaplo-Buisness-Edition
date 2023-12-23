@@ -1,6 +1,6 @@
-# Munakanplo
+# Munakanpló *Buisness Edition*
 
-Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
+Egy nyílt forráskódú munkanapló vezetését megkönnyítő alkalmazás
 
 <details>
 <summary><strong><h2>Telepítése</h2></strong></summary>
@@ -16,22 +16,34 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
 
 1. Docker kép letöltése:
     ```bash
-    sudo docker pull tm01013/munkanaplo3
+    sudo docker pull tm01013/munkanaploBE
     ```
 
 2. Szerver indítása:
     ```bash
-    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo3
+    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaploBE
     ```
+3. Konfiguráció hozzáadása (opcionális)
+    ```bash
+    sudo docker cp <.env fájl> Munkanaplo:/app/.env
+    ```
+    - A konfigurációs fájlnak (.env) a következő beállításokat kell tartalmaznia:
+        ```conf
+        USE_MANAGERS="true"
+        ADMIN_USERNAME=""
+        ```
+    - ezek hatásairól [itt](HOWTOUSE.md) olvashtsz részletesen
+    
 
 <details>
 <summary><h3>Frissítés korábbi verzióról</h3></summary>
 
 > Ehhez adminisztrátori jogosultságra van szükség!
 
-1. Adatbázis kimásolása a régi konténerből
+1. Adatbázis és konfiguráció kimásolása a régi konténerből
     ```bash
     sudo docker cp <régi konténer neve>:/app/app.db ~/app.db
+    sudo docker cp <régi konténer neve>:/app/.env ~/.env
     ```
 2. Régi konténer törlése
     ```bash
@@ -39,12 +51,13 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
     ```
 3. Új konténer telepítése
     ```bash
-    sudo docker pull tm01013/munkanaplo3
-    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo3
+    sudo docker pull tm01013/munkanaploBE
+    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaploBE
     ```
 4. Adatbázis bemásolása az új konténerbe
     ```bash
     sudo docker cp ~/app.db Munkanaplo:/app/app.db
+    sudo docker cp ~/.env Munkanaplo:/app/.env
     ```
 
 </details>
@@ -56,7 +69,7 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
 
 1. Projekt klonolása:
     ```bash
-    git clone https://github.com/tm01013/Munkanaplo2.git
+    git clone https://github.com/tm01013/Munkanaplo-Buisness-Edition.git
     cd Munkanaplo2
     ```
 
@@ -68,13 +81,23 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
 
 3. Docker kép készítése
     ```bash
-    sudo docker build -t munkanaplo3 --no-cache .
+    sudo docker build -t munkanaploBE --no-cache .
     ```
 
 4. Szerver indítása
     ```bash
-    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaplo3
+    sudo docker run --name Munkanaplo -itd -p <port amelyen futtatni akarod>:80 munkanaploBE
     ```
+5. Konfiguráció hozzáadása (opcionális)
+    ```bash
+    sudo docker cp <.env fájl> Munkanaplo:/app/.env
+    ```
+    - A konfigurációs fájlnak (.env) a következő beállításokat kell tartalmaznia:
+        ```conf
+        USE_MANAGERS="true"
+        ADMIN_USERNAME=""
+        ```
+    - ezek hatásairól [itt](HOWTOUSE.md) olvashtsz részletesen
 
 </details>
 
@@ -85,12 +108,3 @@ Egy nyílt forráskódú munkanaplo vezetését megkönnyítő alkalmazás
 ## [Licence](/LICENCE)
 
 © Tatár Márton 2023
-
-Ez a projekt az MIT licence alatt all.
-
-| Lehet                                        | Nem lehet                         | Muszály                                     |
-| -------------------------------------------- | --------------------------------- | ------------------------------------------- |
-| Kereskedelmi célú felhasználás               | Felelőségre vonni a felesztő(ke)t | A felylesztő(k) Copyright jogát feltüntetni |
-| Módosítani                                   |                                   | Tartalmaznia kell az MIT licence-t          |
-| Terjeszteni eredeti vagy módosított formában |                                   |                                             |
-| Privát használat                             |                                   |                                             |

@@ -1,0 +1,53 @@
+@model Munkanaplo2.Models.WorkModel
+
+@{
+    ViewData["Title"] = "Feladat elvégzése";
+}
+
+@using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
+@using Munkanaplo2.Services
+@inject IProjectService projectService
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+
+
+<div class="text-center">
+    <h2 class="display-4">@ViewBag.JobTitle folyamatban! ヽ(͡◕ ͜ʖ ͡◕)ﾉ</h2>
+    <br>
+    <h1 id="counter">--:--:--</h1>
+    <br>
+    <form class="form-inline justify-content-center" asp-controller="Jobs" asp-action="EndWork">
+        <input type="hidden" name="WorkId" value="@Model.Id"></input>
+        <input type="submit" value="Munka befejezése" class="btn btn-primary col-4 my-3"></input>
+    </form>
+
+    <a class="btn btn-primary col-1 mt-3" asp-action="Details" asp-controller="Jobs"
+        asp-route-id="@Model.JobId">Vissza</a>
+</div>
+
+<script>
+    // Set the starting time
+    var startTime = new Date("@Model.StartTime").getTime();
+
+    // Update the counter every second
+    var x = setInterval(function () {
+
+        // Get the current time
+        var now = new Date().getTime();
+
+        // Calculate the difference between the current time and the starting time
+        var distance = now - startTime;
+
+        // Calculate hours, minutes, and seconds
+        var hours = Math.floor(distance / (1000 * 60 * 60));
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        var timeString = hours > 0 ? (hours + ":").padStart(3, '0') : '';
+        timeString += minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0');
+        document.getElementById("counter").innerHTML = timeString;
+
+    }, 1000);
+</script>

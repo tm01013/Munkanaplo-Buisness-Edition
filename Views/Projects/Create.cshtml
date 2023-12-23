@@ -12,7 +12,7 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    @if (!TeacherHelper.IsTeacher(User))
+    @if (ManagerHelper.IsManager(User))
     {
 
         <h1>Új Projekt létrehozása</h1>
@@ -47,10 +47,10 @@
         <div class="text-center">
     <h1 class="display-4">HIBA!</h1>
     <br>
-    <p><strong>Tanárként nem hozhatsz létre feladatokat ｡°(°.◜ᯅ◝°)°｡</strong></p>
+    <p><strong>Csak a mendedzserek hozhatnak létre feladatokat ｡°(°.◜ᯅ◝°)°｡</strong></p>
     <br>
     <a>Ha úgy gondolod ,hogy a programmal van a gond jelensd </a><a
-        href="https://github.com/tm01013/Munkanaplo2.git">itt</a>
+        href="https://github.com/tm01013/Munkanaplo-Buisness-Edition.git">itt</a>
 </div>
     }
 }

@@ -1,5 +1,6 @@
 ﻿@page
 @model LoginModel
+@using dotenv.net
 @{
     ViewData["Title"] = "Bejelentkezés";
 }
@@ -11,7 +12,7 @@
             <form id="account" method="post">
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <input id="teacher-mode-input" type="hidden" asp-for="Input.IsTeacher" value="false" />
+                <input id="teacher-mode-input" type="hidden" asp-for="Input.IsManager" value="false" />
                 <div class="form-floating mb-3">
                     <input asp-for="Input.UserName" class="form-control" autocomplete="username" aria-required="true"
                         placeholder="Felhasználónév" />
@@ -34,10 +35,14 @@
                     <div class="row-auto mb-3"><button id="login-submit" type="submit"
                             class="w-100 btn btn-lg btn-primary">Bejelentkezés</button>
                     </div>
-                    <div class="row-auto mt-3">
-                        <button id="login-submit-teacher" type="submit" class="w-100 btn btn-lg btn-primary">Tanári
-                            bejelentkezés</button>
-                    </div>
+                    @if (DotEnv.Read()["USE_MANAGERS"].ToLower() == "true")
+                    {
+                        <div class="row-auto mt-3">
+                            <button id="login-submit-teacher" type="submit" class="w-100 btn btn-lg btn-primary">Menedzser
+                                bejelentkezés</button>
+                        </div>
+
+                    }
                 </div>
                 <br>
                 <div>

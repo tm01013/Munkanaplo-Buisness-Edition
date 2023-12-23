@@ -11,7 +11,7 @@
     {
         // Make the HTTP GET request
         HttpResponseMessage response = await
-        client.GetAsync("https://raw.githubusercontent.com/tm01013/Munkanaplo2/main/LatestVersion.txt");
+        client.GetAsync("https://raw.githubusercontent.com/tm01013/Munkanaplo-Buisness-Edition/main/LatestVersion.txt");
 
         // Check if the response is successful
         if (response.IsSuccessStatusCode)
@@ -20,7 +20,7 @@
             string content = await response.Content.ReadAsStringAsync();
 
             // Process the content as needed
-            string currentVersionNumber = "3.1.0"; // Replace with the actual current version number
+            string currentVersionNumber = "1.0"; // Replace with the actual current version number
             if (IsNewerVersion(content, currentVersionNumber))
             {
                 UpdateAvailable = true;
@@ -99,7 +99,8 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-themed border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand me-3" asp-area="" asp-controller="Home" asp-action="Index">Munkanapló</a>
+                <a class="navbar-brand me-3" asp-area="" asp-controller="Home" asp-action="Index">Munkanapló <span
+                        class="fst-italic fw-lighter">Buisness Edition</span></a>
 
                 <div class="form-check form-switch my-auto mx-3"
                     style="--bs-form-switch-width: 60px; --bs-form-switch-height: 30px;">
@@ -156,12 +157,12 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container pb-5">
+        <main role="main" class="pb-5 mb-3">
             @RenderBody()
         </main>
     </div>
-    <footer class="fixed-bottom justify-content-between align-items-center py-3 my-4 border-top row">
+    <footer class="fixed-bottom justify-content-between align-items-center py-3 mt-4 border-top row">
         <div class="col-md-4 d-flex d-inline align-items-center justify-content-start">
             <br><span class="ms-3 text-muted">© Tatár Márton - @DateTime.Now.ToString("yyyy") - <a asp-controller="Home"
                     asp-action="Privacy">Használati feltételek</a></span>
@@ -173,7 +174,7 @@
             </div>
         }
         <div class="me-3 col-md-4 d-flex d-inline align-items-center justify-content-end">
-            <span class="text-muted">Munkanapló v3.1 - 2023.12.19</span>
+            <span class="text-muted">Munkanapló BE v1.0 - 2023.12.23</span>
         </div>
     </footer>
     <script>

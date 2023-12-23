@@ -16,8 +16,7 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
-    @if (projectService.GetProjectMembers(Model.ProjectId).Contains(User.Identity.Name.ToString()) &&
-   !TeacherHelper.IsTeacher(User))
+    @if (projectService.GetProjectMembers(Model.ProjectId).Contains(User.Identity.Name.ToString()))
     {
         <h1>Szerkesztés</h1>
         <hr />
@@ -72,8 +71,10 @@
         </form>
     </div>
 </div>
-        <br>
-        <table class="table">
+        @if (!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")
+        {
+            <br>
+            <table class="table">
     <thead>
         <tr>
             <th class="w-1">
@@ -91,50 +92,52 @@
     </thead>
     <tbody>
         @if (ViewBag.SubTasks != null)
-                {
-                    @foreach (var item in ViewBag.SubTasks)
                     {
-                        <tr>
-                            <td class="w-1">
-                                <strong>•</strong>
-                            </td>
-                            <td>
-                                <strong>@item.TaskTitle</strong>
-                            </td>
-                            <td>
-                                @item.TaskDetails
-                            </td>
-                            <td>
-                                <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removeSubTask-@item.Id">Törlés</a>
-                            </td>
-                        </tr>
+                        @foreach (var item in ViewBag.SubTasks)
+                        {
+                            <tr>
+                                <td class="w-1">
+                                    <strong>•</strong>
+                                </td>
+                                <td>
+                                    <strong>@item.TaskTitle</strong>
+                                </td>
+                                <td>
+                                    @item.TaskDetails
+                                </td>
+                                <td>
+                                    <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removeSubTask-@item.Id">Törlés</a>
+                                </td>
+                            </tr>
 
-                        <div class="modal fade" id="removeSubTask-@item.Id" tabindex="-1" aria-labelledby="removeSubTask-@item.Id"
-                            style="display: none;" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalCenterTitle">Alfeladat törlése</h5>
-                                        <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form class="form-inline" asp-controller="Jobs" asp-action="DeleteSubTask">
-                                            <input type="hidden" name="Id" value="@item.Id"></input>
-                                            <p>Biztosan törölni szeretnéd ezt az alfeladatot?</p>
-                                            <br>
-                                            <div class="float-end">
-                                                <input type="submit" value="Törlés" class="btn btn-danger"></input>
-                                            </div>
-                                        </form>
+                            <div class="modal fade" id="removeSubTask-@item.Id" tabindex="-1" aria-labelledby="removeSubTask-@item.Id"
+                                style="display: none;" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalCenterTitle">Alfeladat törlése</h5>
+                                            <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="form-inline" asp-controller="Jobs" asp-action="DeleteSubTask">
+                                                <input type="hidden" name="Id" value="@item.Id"></input>
+                                                <p>Biztosan törölni szeretnéd ezt az alfeladatot?</p>
+                                                <br>
+                                                <div class="float-end">
+                                                    <input type="submit" value="Törlés" class="btn btn-danger"></input>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     }
-                }
 
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+
+        }
         <br>
         <div>
     <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
@@ -142,22 +145,7 @@
 </div>
     }
 }
-@if (SignInManager.IsSignedIn(User) && TeacherHelper.IsTeacher(User))
-{
-    <br />
-    <br />
-    <div class="text-center">
-    <h1 class="display-4">HIBA!</h1>
-    <br>
-    <p><strong>A feladatokat tanárként nem szerkesztheted ｡°(°.◜ᯅ◝°)°｡</strong></p>
-    <br>
-    <a>Ha úgy gondolod ,hogy a programmal van a gond jelensd </a><a
-        href="https://github.com/tm01013/Munkanaplo2.git">itt</a>
-    <br />
-    <a type="button" class="btn btn-primary" asp-controller="Jobs" asp-route-id="@Model.ProjectId"
-        asp-action="Index">Vissza</a>
-</div>
-}
+
 
 @section Scripts {
     @{

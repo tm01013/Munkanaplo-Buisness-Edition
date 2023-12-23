@@ -84,7 +84,7 @@ namespace Munkanaplo2.Areas.Identity.Pages.Account
             [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
 
-            public bool IsTeacher { get; set; }
+            public bool IsManager { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -114,9 +114,9 @@ namespace Munkanaplo2.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                if (!Input.IsTeacher)
+                if (!Input.IsManager)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(Input.UserName.ToString().Split(" [Tanár]")[0].Trim(), Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                    var result = await _signInManager.PasswordSignInAsync(Input.UserName.ToString().Split(" [Menedzser]")[0].Trim(), Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
                     if (result.Succeeded)
                     {
@@ -140,7 +140,7 @@ namespace Munkanaplo2.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    var result = await _signInManager.PasswordSignInAsync(Input.UserName + " [Tanár]", Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                    var result = await _signInManager.PasswordSignInAsync(Input.UserName + " [Menedzser]", Input.Password, Input.RememberMe, lockoutOnFailure: false);
 
                     if (result.Succeeded)
                     {
