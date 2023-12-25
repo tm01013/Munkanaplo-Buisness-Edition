@@ -127,32 +127,18 @@ namespace Munkanaplo2.Areas.Identity.Pages.Account
                     await _userStore.SetUserNameAsync(user, Input.UserName.Split(" [Menedzser]")[0].Trim() + " [Menedzser]", CancellationToken.None);
                     await _emailStore.SetEmailAsync(user, Input.UserName.Split(" [Menedzser]")[0].Trim() + " [Menedzser]", CancellationToken.None);
                     var result = await _userManager.CreateAsync(user, Input.Password);
+
+                    WorkerModel worker = new WorkerModel
+                    {
+                        User = Input.UserName.Split(" [Menedzser]")[0].Trim() + " [Menedzser]",
+                        MoneyPerHour = 0
+                    };
+
+                    _context.Add(worker);
+                    _context.SaveChanges();
+
                     if (result.Succeeded)
                     {
-                        /*_logger.LogInformation("User created a new account with password.");
-
-                        var userId = await _userManager.GetUserIdAsync(user);
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                            protocol: Request.Scheme);
-
-                        await _emailSender.SendEmailAsync(Input.UserName, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("RegisterConfirmation", new { email = Input.UserName, returnUrl = returnUrl });
-                        }
-                        else
-                        {
-                            await _signInManager.SignInAsync(user, isPersistent: false);
-                            return LocalRedirect(returnUrl);
-                        }*/
-
                         await _signInManager.SignInAsync(user, isPersistent: false);
 
                         return RedirectToAction("Index", "Home");
@@ -168,44 +154,17 @@ namespace Munkanaplo2.Areas.Identity.Pages.Account
                     await _emailStore.SetEmailAsync(user, Input.UserName.Split(" [Menedzser]")[0].Trim(), CancellationToken.None);
                     var result = await _userManager.CreateAsync(user, Input.Password);
 
-                    if (DotEnv.Read()["USE_MANAGERS"].ToLower() == "true" || DotEnv.Read()["ADMIN_USERNAME"].ToLower() != Input.UserName.Split(" [Menedzser]")[0].Trim())
+                    WorkerModel worker = new WorkerModel
                     {
-                        WorkerModel worker = new WorkerModel
-                        {
-                            User = Input.UserName.Split(" [Menedzser]")[0].Trim(),
-                            MoneyPerHour = 0
-                        };
+                        User = Input.UserName.Split(" [Menedzser]")[0].Trim(),
+                        MoneyPerHour = 0
+                    };
 
-                        _context.Add(worker);
-                    }
-
+                    _context.Add(worker);
+                    _context.SaveChanges();
 
                     if (result.Succeeded)
                     {
-                        /*_logger.LogInformation("User created a new account with password.");
-
-                        var userId = await _userManager.GetUserIdAsync(user);
-                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                        var callbackUrl = Url.Page(
-                            "/Account/ConfirmEmail",
-                            pageHandler: null,
-                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                            protocol: Request.Scheme);
-
-                        await _emailSender.SendEmailAsync(Input.UserName, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                        {
-                            return RedirectToPage("RegisterConfirmation", new { email = Input.UserName, returnUrl = returnUrl });
-                        }
-                        else
-                        {
-                            await _signInManager.SignInAsync(user, isPersistent: false);
-                            return LocalRedirect(returnUrl);
-                        }*/
-
                         await _signInManager.SignInAsync(user, isPersistent: false);
 
                         return RedirectToAction("Index", "Home");

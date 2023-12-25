@@ -78,23 +78,24 @@
                         @Html.DisplayFor(model => model.FinishDate)
                     </dd>
                 }
-    </dl>
-    @if(WorkService.GetMyOngoingWork() == null && ((!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") || (DotEnv.Read()["ADMIN_USERNAME"].ToString() != User.Identity.Name && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")))
-    {
-        <form id="startWork-form" class="form-inline my-5" asp-controller="Jobs" asp-action="StartWork">
-        <input type="hidden" name="JobId" value="@Model.Id"></input>
-        <input form="startWork-form" type="submit" value="Munka indítása" class="btn btn-primary"></input>
-        </form>
-    }
-    else if(WorkService.GetMyOngoingWork() != null && ((!ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") || (DotEnv.Read()["ADMIN_USERNAME"].ToString() != User.Identity.Name && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")))
-    {
-        <div class="pt-3 my-3 pb-4">
-            <a class="btn btn-secondary" asp-action="OpenWorkTable" asp-controller="Jobs" asp-route-UserName="@User.Identity.Name">Már folyamatban van egy munkád</a>
-        </div>
-    }
-    
+            </dl>
+            @if (WorkService.GetMyOngoingWork() == null)
+            {
+                <form id="startWork-form" class="form-inline my-5" asp-controller="Jobs" asp-action="StartWork">
+                    <input type="hidden" name="JobId" value="@Model.Id"></input>
+                    <input form="startWork-form" type="submit" value="Munka indítása" class="btn btn-primary"></input>
+                </form>
+            }
+            else if (WorkService.GetMyOngoingWork() != null)
+            {
+                <div class="pt-3 my-3 pb-4">
+                    <a class="btn btn-secondary" asp-action="OpenWorkTable" asp-controller="Jobs"
+                        asp-route-UserName="@User.Identity.Name">Már folyamatban van egy munkád</a>
+                </div>
+            }
 
-<!--- SubTasks --->
+
+            <!--- SubTasks --->
 
             <table class="table">
                 <thead>
@@ -105,13 +106,7 @@
                             <strong>Alfeladatok</strong>
                         </th>
                         <th>
-                            @if (!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")
-                            {
-                                @if(dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "true" || dotenv.net.DotEnv.Read()["ADMIN_USERNAME"] != User.Identity.Name)
-                                {
-                                    <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#addSubTask">Új</a>
-                                }
-                            }
+                            <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#addSubTask">Új</a>
                         </th>
                         <th>
                         </th>
@@ -157,7 +152,7 @@
                 <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
             </div>
             <div class="modal-body">
-                        @if (!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")
+                @if (!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")
                         {
                             <form id="addSubTaskForm" class="form-inline" asp-controller="Jobs" asp-action="CreateSubTask">
                                 <input type="hidden" name="JobId" value="@Model.Id"></input>
@@ -193,10 +188,11 @@
             </div>
         </div>
 
-<!--- Kész gomb --->
+        <!--- Kész gomb --->
 
         <div>
-            @if ((!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") && Model.JobStatus == "folyamatban")
+    @if ((!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") &&
+           Model.JobStatus == "folyamatban")
             {
                 <form asp-controller="Jobs" asp-action="EditConfirmed">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>

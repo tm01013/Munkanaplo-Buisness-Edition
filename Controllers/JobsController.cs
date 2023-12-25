@@ -322,9 +322,6 @@ namespace Munkanaplo2.Controllers
 		{
 			if (!IsConfigCorrect()) return View("ConfigError");
 
-			if (ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
-			if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == User.Identity.Name.ToLower() && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") return View("AccesDenied");
-
 			var jobModel = await _context.JobModel.FindAsync(subTaskModel.JobId);
 			var projectMemberships = _context.ProjectMemberships
 									.Where(pm => pm.ProjectId == jobModel.ProjectId)
@@ -354,9 +351,6 @@ namespace Munkanaplo2.Controllers
 
 			var subTask = await _context.SubTaskModel.FindAsync(id);
 			if (subTask == null) return NotFound();
-
-			if (ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
-			if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == User.Identity.Name.ToLower() && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") return View("AccesDenied");
 
 			var jobModel = await _context.JobModel.FindAsync(subTask.JobId);
 			var projectMemberships = _context.ProjectMemberships
@@ -400,9 +394,6 @@ namespace Munkanaplo2.Controllers
 		{
 			if (!IsConfigCorrect()) return View("ConfigError");
 
-			if (ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
-			if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == User.Identity.Name.ToLower() && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") return View("AccesDenied");
-
 			if (_context.JobModel.Find(JobId) == null) return NotFound();
 			int projectId = _context.JobModel.Find(JobId).ProjectId;
 			var projectMemberships = _context.ProjectMemberships
@@ -444,9 +435,6 @@ namespace Munkanaplo2.Controllers
 		{
 			if (!IsConfigCorrect()) return View("ConfigError");
 
-			if (ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
-			if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == User.Identity.Name.ToLower() && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") return View("AccesDenied");
-
 			WorkModel work = _context.WorkModel.Find(id);
 
 			if (work == null) return NotFound();
@@ -464,9 +452,6 @@ namespace Munkanaplo2.Controllers
 		public async Task<IActionResult> EndWork([Bind("WorkId")] int WorkId)
 		{
 			if (!IsConfigCorrect()) return View("ConfigError");
-
-			if (ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true") return View("AccesDenied");
-			if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == User.Identity.Name.ToLower() && DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") return View("AccesDenied");
 
 			WorkModel work = await _context.WorkModel.FindAsync(WorkId);
 			if (work == null) return NotFound();
@@ -503,10 +488,9 @@ namespace Munkanaplo2.Controllers
 				List<WorkModel> works = await _context.WorkModel.Where(wm => wm.User == UserName && wm.isFinished == true).ToListAsync();
 
 				if (!ManagerHelper.IsManager(User) && User.Identity.Name.ToString() != UserName) return View("AccesDenied");
-				if (ManagerHelper.IsManager(UserName)) return NotFound();
 
 				//Check if manager have right to view user work table----------------
-				if (ManagerHelper.IsManager(User))
+				if (ManagerHelper.IsManager(User) && User.Identity.Name != UserName)
 				{
 					List<ProjectMembership> projectMemberships = await _context.ProjectMemberships.Where(pm => pm.Member == User.Identity.Name.ToString()).ToListAsync();
 					List<ProjectModel> Projects = new List<ProjectModel>();
@@ -534,7 +518,7 @@ namespace Munkanaplo2.Controllers
 				//-------------------------------------------------------------------
 
 				//Remove works that arent in same projects that th manager----------
-				if (ManagerHelper.IsManager(User))
+				if (ManagerHelper.IsManager(User) && User.Identity.Name != UserName)
 				{
 					List<JobModel> jobs = new List<JobModel>();
 					foreach (WorkModel work in works)
@@ -607,7 +591,6 @@ namespace Munkanaplo2.Controllers
 				List<WorkModel> works = await _context.WorkModel.Where(wm => wm.User == UserName && wm.isFinished == true).ToListAsync();
 
 				if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() != User.Identity.Name.ToLower() && User.Identity.Name.ToString() != UserName) return View("AccesDenied");
-				if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == UserName.ToLower()) return NotFound();
 
 				List<string> firstJobTitles = new List<string>();
 				List<string> secondJobTitles = new List<string>();

@@ -1,9 +1,19 @@
 @model List<Munkanaplo2.Models.WorkModel>
 
+@using Microsoft.AspNetCore.Identity
+@using Munkanaplo2.Global
+@using Munkanaplo2.Services
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@inject IWorkService workService
+
 @{
-    ViewData["Title"] = "Munkák";
+    ViewData["Title"] = "Munkáim";
+    
     string[] months = {"Január", "Február", "Március", "Április", "Május", "Júnuis", "Július", "Augusztus", "Szeptember",
 "Október", "November", "December"};
+
+    // Hour suming--------------------
     int[] hoursWorkedSums = new int[12];
     foreach (WorkModel work in Model)
     {
@@ -53,6 +63,9 @@
             }
         }
     }
+    //--------------------------------
+
+    //other------------------------------------
 
     //row, col
     int[,] workPerJobPerMonth = new int[12, ViewBag.FirstJobTitles.Count];
@@ -78,7 +91,7 @@
         {
             for (int i = 0; i < worksPerCurrentMonth.Count; i++)
             {
-                if (WorkService.GetJobTitleByWorkId(worksPerCurrentMonth[i].Id) == ViewBag.FirstJobTitles[c])
+                if (workService.GetJobTitleByWorkId(worksPerCurrentMonth[i].Id) == ViewBag.FirstJobTitles[c])
                 {
                     DateTime endSpan = DateTime.Parse(worksPerCurrentMonth[i].EndTiem);
                     DateTime startSpan = DateTime.Parse(worksPerCurrentMonth[i].StartTime);
@@ -133,14 +146,51 @@
             }
         }
     }
-}
 
-@using Microsoft.AspNetCore.Identity
-@using Munkanaplo2.Global
-@using Munkanaplo2.Services
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
-@inject IWorkService WorkService
+    //------------------------------------------
+    // keyformat: month/day
+    Dictionary<string, int[]> daylySums = new Dictionary<string, int[]>();
+    Dictionary<string, int> daylyTotal = new Dictionary<string, int>();
+
+    if(ViewBag.FirstJobTitles.Count > 0)
+    {
+        foreach(WorkModel work in Model)
+        {
+            DateTime startTime = DateTime.Parse(work.StartTime);
+            DateTime endTime = DateTime.Parse(work.EndTiem);
+            int secondsWorked = (int)endTime.Subtract(startTime).TotalSeconds;
+
+            string key = startTime.Month + "/" + startTime.Day;
+            if(!daylySums.ContainsKey(key)) 
+            {
+                int[] emptyWorkArray = new int[ViewBag.FirstJobTitles.Count];
+                for(int i = 0; i < ViewBag.FirstJobTitles.Count;i++)
+                {
+                    emptyWorkArray[i] = 0;
+                }
+
+                daylyTotal[key] = 0;
+                daylySums.Add(key, emptyWorkArray);
+            }
+            int firstJobId = 0;
+            bool ifFound = false;
+            foreach(string jobTitle in ViewBag.FirstJobTitles)
+            {
+                if(jobTitle == workService.GetJobTitleByWorkId(work.Id))
+                {
+                    firstJobId = ViewBag.FirstJobTitles.IndexOf(jobTitle);
+                    ifFound = true;
+                    break;
+                }
+            }
+            if(ifFound)
+            {
+                daylySums[key][firstJobId] += secondsWorked;
+                daylyTotal[key] += secondsWorked;
+            } 
+        }
+    }
+}
 
 
 <h1 class="display-4">Munkák</h1>
@@ -195,32 +245,30 @@
                 }
             </tr>
 
-
-
             <!------------------------ Collapsed sections ------------------------------>
-            @for (int fj = 0; fj < ViewBag.FirstJobTitles.Count; fj++)
+            @for(int day = 1; day <= 31; day++)
             {
-                @for (int w = 0; w < workPerJob[m, fj].Count; w++)
+                @if(daylySums.ContainsKey((m + 1) + "/" + day))
                 {
                     <tr id="monthCollapse-@(m)" class="collapse multi-collapse">
-                        <td class="ps-3">@months[m] @DateTime.Parse(workPerJob[m, fj][w].StartTime).Day</td>
+                        <td>@months[m] @day</td>
 
                         @{
-                            float moneyGotAtDay = (float)ViewBag.MoneyPerHour * (float)(DateTime.Parse(workPerJob[m, fj][w].EndTiem).Subtract(DateTime.Parse(workPerJob[m,fj][w].StartTime)).TotalMinutes / 60);
+                            string key = (m +1) + "/" + day;
+                            float moneyGotAtDay = (float)ViewBag.MoneyPerHour * (float)(TimeSpan.FromSeconds(daylyTotal[key]).TotalMinutes / 60);
                             float moneyGotRoundedAtDay = moneyGotAtDay % 1000 >= 500 ? ((moneyGotAtDay - moneyGotAtDay % 1000) + 1000) : (moneyGotAtDay - moneyGotAtDay % 1000);
                         }
 
                         <td>@((int)moneyGotRoundedAtDay) Ft</td>
 
+                        <td>@TimeSpan.FromSeconds(daylyTotal[key]).Hours:@TimeSpan.FromSeconds(daylyTotal[key]).Minutes</td>
                         <td></td>
-                        <td></td>
-                        @for (int a = 0; a < ViewBag.FirstJobTitles.Count; a++)
+
+                        @for(int fj = 0; fj < ViewBag.FirstJobTitles.Count; fj++)
                         {
-                            if (ViewBag.FirstJobTitles[a] == WorkService.GetJobTitleByWorkId(workPerJob[m, fj][w].Id))
+                            @if(daylySums[key][fj] > 0)
                             {
-                                <td>@DateTime.Parse(workPerJob[m, fj][w].EndTiem).Subtract(DateTime.Parse(workPerJob[m,
-                                             fj][w].StartTime)).Hours:@DateTime.Parse(workPerJob[m, fj][w].EndTiem).Subtract(DateTime.Parse(workPerJob[m, fj][w].StartTime)).Minutes
-                                </td>
+                                <td>@TimeSpan.FromSeconds(daylySums[key][fj]).Hours:@TimeSpan.FromSeconds(daylySums[key][fj]).Minutes</td>
                             }
                             else
                             {
