@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Munkanaplo2.Data;
 using Munkanaplo2.Models;
 using System.Collections.Generic;
@@ -9,5 +10,6 @@ namespace Munkanaplo2.Services
     {
         List<ProjectModel> GetProjectsAsync();
         List<string> GetProjectMembers(int id);
+        List<ProjectModel> GetMyProjects(string user);
     }
 }

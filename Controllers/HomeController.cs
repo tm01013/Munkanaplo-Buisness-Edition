@@ -96,8 +96,8 @@ public class HomeController : Controller
 
     bool IsConfigCorrect()
     {
-        if (DotEnv.Read()["ADMIN_USERNAME"].ToLower() == null) return false;
-        if (DotEnv.Read()["USE_MANAGERS"].ToLower() == null) return false;
+        if (!DotEnv.Read().ContainsKey("ADMIN_USERNAME")) return false;
+        if (!DotEnv.Read().ContainsKey("USE_MANAGERS")) return false;
         if (DotEnv.Read()["USE_MANAGERS"].ToLower().Trim() == "") return false;
 
         if (DotEnv.Read()["USE_MANAGERS"].ToLower() == "false" && DotEnv.Read()["ADMIN_USERNAME"].ToLower().Trim() == "") return false;
