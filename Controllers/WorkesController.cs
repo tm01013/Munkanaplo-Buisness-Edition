@@ -50,17 +50,19 @@ namespace Munkanaplo2.Controllers
                     }
                 }
                 List<WorkerModel> workers = new List<WorkerModel>();
+                workers.Add(_context.Workers.Where(w => w.User == User.Identity.Name).ToList()[0]);
                 foreach (string worker in othersInSameProject)
                 {
                     workers.Add(_context.Workers.Where(wm => wm.User == worker).ToList()[0]);
                 }
                 return View(workers);
             }
-            else
+            else if (DotEnv.Read()["USE_MANAGERS"].ToLower() == "false" && DotEnv.Read()["ADMIN_USERNAME"] == User.Identity.Name)
             {
                 List<WorkerModel> workers = _context.Workers.ToList();
                 return View("Index", workers);
             }
+            return View("AccesDenied");
         }
 
         [Authorize]
@@ -74,8 +76,6 @@ namespace Munkanaplo2.Controllers
 
             if (ManagerHelper.IsManager(User) && DotEnv.Read()["USE_MANAGERS"].ToLower() == "true")
             {
-
-
                 List<ProjectMembership> myProjectMemberships = await _context.ProjectMemberships.Where(pm => pm.Member == User.Identity.Name.ToString()).ToListAsync();
                 List<ProjectModel> myProjects = new List<ProjectModel>();
 
@@ -93,6 +93,7 @@ namespace Munkanaplo2.Controllers
                     }
                 }
                 List<WorkerModel> workers = new List<WorkerModel>();
+                workers.Add(_context.Workers.Where(w => w.User == User.Identity.Name).ToList()[0]);
                 foreach (string worker in othersInSameProjects)
                 {
                     workers.Add(_context.Workers.Where(wm => wm.User == worker).ToList()[0]);

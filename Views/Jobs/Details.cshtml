@@ -89,8 +89,8 @@
             else if (WorkService.GetMyOngoingWork() != null)
             {
                 <div class="pt-3 my-3 pb-4">
-                    <a class="btn btn-secondary" asp-action="OpenWorkTable" asp-controller="Jobs"
-                        asp-route-UserName="@User.Identity.Name">Már folyamatban van egy munkád</a>
+                    <a class="btn btn-secondary" asp-action="OpenWork" asp-controller="Jobs"
+                        asp-route-id="@WorkService.GetMyOngoingWork().Id">Már folyamatban van egy munkád</a>
                 </div>
             }
 
@@ -142,6 +142,7 @@
                 </tbody>
             </table>
         </div>
+        <br>
 
         <div class="modal fade" id="addSubTask" tabindex="-1" aria-labelledby="addSubTask" style="display: none;"
     aria-hidden="true">
@@ -152,47 +153,43 @@
                 <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
             </div>
             <div class="modal-body">
-                @if (!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false")
-                        {
-                            <form id="addSubTaskForm" class="form-inline" asp-controller="Jobs" asp-action="CreateSubTask">
-                                <input type="hidden" name="JobId" value="@Model.Id"></input>
-                                <div class="row">
-                                    <div class="col-1">
-                                        <strong>• </strong>
-                                    </div>
-                                    <div class="col-4 form-inline">
-                                        <input name="TaskTitle" class="form-control w-100" placeholder="Cím" />
-                                    </div>
-                                    <div class="col-7 form-inline">
-                                        <input name="TaskDetails" class="form-control w-100" placeholder="Leírás"
-                                            style="margin-left: 10px;" />
-                                    </div>
-                                </div>
-                                <input type="hidden" name="TaskCreator" class="form-control"
-                                    value="@User.Identity.Name.ToString()" />
-                                <input type="hidden" name="TaskCreationDate" class="form-control"
-                                    value="@DateTime.Now.ToString("yyyy/MM/dd H:mm")" />
-                                <br />
-                            </form>
-                        }
-                    </div>
-                    <div class="modal-footer">
-                        <div class="float-end">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mégse</button>
-                            <a> | </a>
-                            <input type="submit" value="Hozzáadás" form="addSubTaskForm" class="btn btn-success"></input>
+                <form id="addSubTaskForm" class="form-inline" asp-controller="Jobs" asp-action="CreateSubTask">
+                    <input type="hidden" name="JobId" value="@Model.Id"></input>
+                    <div class="row">
+                        <div class="col-1">
+                            <strong>• </strong>
                         </div>
-
+                        <div class="col-4 form-inline">
+                            <input name="TaskTitle" class="form-control w-100" placeholder="Cím" />
+                        </div>
+                        <div class="col-7 form-inline">
+                            <input name="TaskDetails" class="form-control w-100" placeholder="Leírás"
+                                style="margin-left: 10px;" />
+                        </div>
                     </div>
+                    <input type="hidden" name="TaskCreator" class="form-control"
+                        value="@User.Identity.Name.ToString()" />
+                    <input type="hidden" name="TaskCreationDate" class="form-control"
+                        value="@DateTime.Now.ToString("yyyy/MM/dd H:mm")" />
+                    <br />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="float-end">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mégse</button>
+                    <a> | </a>
+                    <input type="submit" value="Hozzáadás" form="addSubTaskForm" class="btn btn-success"></input>
                 </div>
+
             </div>
         </div>
+    </div>
+</div>
 
         <!--- Kész gomb --->
 
         <div>
-    @if ((!ManagerHelper.IsManager(User) || dotenv.net.DotEnv.Read()["USE_MANAGERS"].ToLower() == "false") &&
-           Model.JobStatus == "folyamatban")
+    @if (Model.JobStatus == "folyamatban")
             {
                 <form asp-controller="Jobs" asp-action="EditConfirmed">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -219,7 +216,7 @@
                     </div>
                     <div class="form-group">
                         <input type="hidden" asp-for="JobStatus" class="form-control"
-                            value="Befejezve @User.Identity?.Name.ToString() által." />
+                            value="Befejezve @User.Identity?.Name.Split(" [Menedzser]")[0] által." />
                         <span asp-validation-for="JobStatus" class="text-danger"></span>
                     </div>
                     <div class="form-group">

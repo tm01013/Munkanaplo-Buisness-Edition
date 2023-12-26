@@ -19,23 +19,24 @@
     <div class="row">
     @foreach (WorkerModel worker in Model)
         {
-            <div class="col-4">
+            <div class="col-4 py-3">
                 <div class="card border-primary align-items-center">
                     <div class="pt-4">
                         <i class="bi bi-person-circle h1"></i>
                     </div>
                     <div class="card-body align-items-center">
-                        <h3 class="text-center card-text">@worker.User</h3>
+                        <h3 class="text-center card-text">@worker.User.Split(" [Menedzser]")[0]</h3>
                         <p class="pt-2">@worker.MoneyPerHour Ft/óra <a class="btn btn-info" data-bs-toggle="modal"
-                                data-bs-target="#editMoneyPerHour-@(worker.User)">Szerkesztés</a></p>
+                                data-bs-target="#editMoneyPerHour-@(worker.User.Split(" [Menedzser]")[0])">Szerkesztés</a></p>
                         <p class="text-center pt-2"><a class="btn btn-primary" asp-action="OpenWorkTable" asp-controller="Jobs"
                                 asp-route-UserName="@worker.User">Munka megtekintése</a></p>
                     </div>
                 </div>
             </div>
 
-            <div class="modal fade" id="editMoneyPerHour-@(worker.User)" tabindex="-1"
-                aria-labelledby="editMoneyPerHour-@(worker.User)" style="display: none;" aria-hidden="true">
+            <div class="modal fade" id="editMoneyPerHour-@(worker.User.Split(" [Menedzser]")[0])" tabindex="-1"
+                aria-labelledby="editMoneyPerHour-@(worker.User.Split(" [Menedzser]")[0])" style="display: none;"
+                aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -43,20 +44,21 @@
                             <button type="button" class="btn" data-bs-dismiss="modal"><strong>X</strong></button>
                         </div>
                         <div class="modal-body">
-                            <form id="editMoneyPerHourForm-@(worker.User)" asp-action="EditMoneyPerHour"
-                                asp-controller="Workers">
+                            <form id="editMoneyPerHourForm-@(worker.User.Split(" [Menedzser]")[0])"
+                                asp-action="EditMoneyPerHour" asp-controller="Workers">
                                 <input type="hidden" name="WorkerId" value="@worker.Id" />
-                                <input aria-describedby="MoneyPerHourInput-@(worker.User)" type="number" name="MoneyPerHour" />
-                                <div id="MoneyPerHourInput-@(worker.User)" class="form-text">Régi fizetés: @worker.MoneyPerHour
-                                    Ft</div>
+                                <input aria-describedby="MoneyPerHourInput-@(worker.User.Split(" [Menedzser]")[0])"
+                                    type="number" name="MoneyPerHour" />
+                                <div id="MoneyPerHourInput-@(worker.User.Split(" [Menedzser]")[0])" class="form-text">Régi
+                                    fizetés: @worker.MoneyPerHour Ft</div>
                             </form>
                         </div>
                         <div class="modal-footer pt-2">
                             <div class="float-end">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mégse</button>
                                 <a> | </a>
-                                <button form="editMoneyPerHourForm-@(worker.User)"
-                                    id="editMoneyPerHourFormSubmit-@(worker.User)" type="submit"
+                                <button form="editMoneyPerHourForm-@(worker.User.Split(" [Menedzser]")[0])"
+                                    id="editMoneyPerHourFormSubmit-@(worker.User.Split(" [Menedzser]")[0])" type="submit"
                                     class="btn btn-success">Mentés</button>
                             </div>
 

@@ -26,7 +26,8 @@ namespace Munkanaplo2.Controllers
 		}
 
 		#region JobStuff
-		// GET: Jobs
+
+
 		[Authorize]
 		public async Task<IActionResult> Index([Bind("Id")] int Id)
 		{
@@ -49,7 +50,6 @@ namespace Munkanaplo2.Controllers
 			return View("Index");
 		}
 
-		// GET: Jobs/Details/5
 		[Authorize]
 		public async Task<IActionResult> Details(int id)
 		{
@@ -94,8 +94,6 @@ namespace Munkanaplo2.Controllers
 			return View(jobModel);
 		}
 
-
-		// GET: Jobs/Create
 		[Authorize]
 		public async Task<IActionResult> Create([Bind("Id")] int Id)
 		{
@@ -114,16 +112,13 @@ namespace Munkanaplo2.Controllers
 			var usersInProject = await _context.ProjectMemberships.Where(pm => pm.ProjectId == Id).ToListAsync();
 			foreach (ProjectMembership pm in usersInProject)
 			{
-				if (!ManagerHelper.IsManager(pm.Member)) users.Add(pm.Member);
+				users.Add(pm.Member);
 			}
 			ViewBag.Users = new SelectList(users);
 			ViewBag.ProjectId = Id;
 			return View();
 		}
 
-		// POST: Jobs/Create
-		// To protect from overposting attacks, enable the specific properties you want to bind to.
-		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost()]
 		[Authorize]
 		[ValidateAntiForgeryToken]
@@ -153,7 +148,6 @@ namespace Munkanaplo2.Controllers
 		}
 
 		[Authorize]
-		// GET: Jobs/Edit/5
 		public async Task<IActionResult> Edit(int? id)
 		{
 			if (!IsConfigCorrect()) return View("ConfigError");
@@ -193,9 +187,6 @@ namespace Munkanaplo2.Controllers
 			return View(jobModel);
 		}
 
-		// POST: Jobs/Edit/5
-		// To protect from overposting attacks, enable the specific properties you want to bind to.
-		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[Authorize]
 		[ValidateAntiForgeryToken]
@@ -242,7 +233,6 @@ namespace Munkanaplo2.Controllers
 		}
 
 		[Authorize]
-		// GET: Jobs/Delete/5
 		public async Task<IActionResult> Delete(int? id)
 		{
 			if (!IsConfigCorrect()) return View("ConfigError");
@@ -272,7 +262,6 @@ namespace Munkanaplo2.Controllers
 			return View(jobModel);
 		}
 
-		// POST: Jobs/Delete/5
 		[Authorize]
 		[HttpPost]
 		[ValidateAntiForgeryToken]
@@ -525,7 +514,8 @@ namespace Munkanaplo2.Controllers
 					{
 						if (!jobs.Contains(_context.JobModel.Find(work.JobId))) jobs.Add(_context.JobModel.Find(work.JobId));
 					}
-					foreach (JobModel job in jobs)
+					var jobsForLoop = jobs.ToList();
+					foreach (JobModel job in jobsForLoop)
 					{
 						var projectMemberships = _context.ProjectMemberships
 							.Where(pm => pm.ProjectId == job.ProjectId)
@@ -538,7 +528,8 @@ namespace Munkanaplo2.Controllers
 							}
 						}
 					}
-					foreach (WorkModel work in works)
+					var worksForLoop = works.ToList();
+					foreach (WorkModel work in worksForLoop)
 					{
 						if (!jobs.Where(j => j.Id == work.JobId).Any())
 						{
