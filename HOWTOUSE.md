@@ -71,7 +71,8 @@
   2. A _projektek_ menüben rékattintotok a _Feladatok_ gombra
 - Feladatokat itt tudtok létrehozni, szerkeszteni és nézegetni
 
-- A Menedzserek nem felyezhetnek be feladatoket!
+- v1.1 óta menedzserrek is hozhatnak létre a alfeladatokat
+- v1.1 óta menedzserrek is felyezhetnek be feladatokat
 </details>
 
 <details>
@@ -89,7 +90,8 @@
 
 ### Menedzserek:
 
-- A Menedzserek nem hozhatnak létre, nem szerkeszthetik és törölhetik az alfeladatokat
+- Alfeladatokat egy feladat _részletek_ oldaláról hozhattok létre
+- Alfeladatokat egy feladat _szerkesztés_ oldaláról törölhettek.
 </details>
 
 <details>
@@ -97,6 +99,8 @@
 <hr>
 
 > Végre eljutottunk a lényeghez ;)
+
+> A konfiguráció *USE_MANAGERS* opciója befolyásolja ezt az egységet!
 
 ### Beosztottak:
 
@@ -112,11 +116,22 @@
 
 ### Menedzserek:
 
+- Egy munkát a feladat *részletek* oldaláról tudtok elindítani
+  > A megnyíló  *munka folyamatban* ablakot bezárhatjátok, etől a munka nem fog leállni.
+- Egyszerre csak egy munkát tudtok indítani profilonként
+
+- A jelenleg folyamatban lévő munkát a menüsor jobb oldalán lévő táska ikonra kattintva érhettek el.
+
+- A befejezett munkáidat a *Munkáim* gombra (menüsor jobboldal) kattinta érhettek el
+
+  ### Beoszttotak "menedzselése":
+
 - A beosztottjaitokat a *beosztottjaim* gombra (menüsor jobb oldal) kattintva érhetitek el 
-  > Valaki csak akkor számit a beosztottadnak, ha legalább egy olyan olyan projektneki is a tagja aminek te is tagja vagy
+  > Valaki csak akkor számit a beosztottadnak, ha legalább egy olyan olyan projektnek is a tagja aminek te is tagja vagy
 - A beosztottaid órabérét is a *beusztottjaim* oldalon szerkesztheted
 - Itt tudod a beosztottjaid munkáit is megtekinteni
   > A beosztattjaid csak azokhoz a projektekhez tartozó munkáit léthatod amelyeknek te is tagja vagy.
+- a saját órabéredet is itt tudod állítani.
 </details>
 
 <details>
